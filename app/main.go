@@ -11,7 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 package main
 
 import (
@@ -132,6 +131,7 @@ func (t userAgentTransport) RoundTrip(req *http.Request) (*http.Response, error)
 	return t.base.RoundTrip(req)
 }
 
+// NewSeverityLogger creates a severitylogger for the logging of the things.
 func NewSeverityLogger(name, project string) (*SeverityLogger, error) {
 
 	client, err := logging.NewClient(context.Background(), project)
@@ -143,6 +143,8 @@ func NewSeverityLogger(name, project string) (*SeverityLogger, error) {
 	return &SeverityLogger{name, client}, nil
 }
 
+// SeverityLogger is a struct for aggregating making calls to log a little
+// easier.
 type SeverityLogger struct {
 	name   string
 	client *logging.Client
