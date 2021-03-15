@@ -29,6 +29,7 @@ var s *SeverityLogger
 
 func main() {
 
+	var err error
 	fmt.Printf("Spinning up chatty logs\n")
 	mclient := metadata.NewClient(&http.Client{Transport: userAgentTransport{
 		userAgent: "chattylogs",
@@ -36,10 +37,14 @@ func main() {
 	}})
 
 	fmt.Printf("Getting project id.\n")
-	projectID, err := mclient.ProjectID()
-	if err != nil {
-		fmt.Printf("cannot get id from metadata, defaulting to env (%s), \n", err)
-		projectID = os.Getenv("PROJECT_ID")
+	projectID := os.Getenv("PROJECT_ID")
+
+	if projectID == "" {
+
+		projectID, err = mclient.ProjectID()
+		if err != nil {
+			log.Fatalf("cannot get projectid, so can't log: %v", err)
+		}
 	}
 
 	fmt.Printf("Project ID: %s\n", projectID)
@@ -53,6 +58,10 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to create logger: %v", err)
 	}
+
+	defer s.Close()
+
+	fmt.Printf("Client created, all ready to spam your logs.\n")
 
 	fillLogs(s)
 
@@ -138,7 +147,8 @@ func NewSeverityLogger(name, project string) (*SeverityLogger, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to create client: %v", err)
 	}
-	defer client.Close()
+
+	client.Logger(name).StandardLogger(logging.Critical).Printf("Logger successfully created")
 
 	return &SeverityLogger{name, client}, nil
 }
@@ -157,4 +167,9 @@ func (s *SeverityLogger) log(severity logging.Severity, msg string, arg ...inter
 func (s *SeverityLogger) loghttp(r *http.Request) {
 	d := time.Now().Format("[02/Jan/2006:15:04:06 -0700]")
 	fmt.Printf("%s %s %s \"%s %s %s\" %d %d\n", r.Host, r.UserAgent(), d, r.Method, r.URL.Path, r.Proto, http.StatusOK, r.ContentLength)
+}
+
+// Close ends the client session.
+func (s *SeverityLogger) Close() {
+	s.client.Close()
 }
