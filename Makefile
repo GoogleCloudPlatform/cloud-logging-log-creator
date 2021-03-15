@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-APPNAME = chattylogs
+APPNAME = cloud-logging-log-creator
 PROJECT = $(shell gcloud config get-value project)
 
 env:
@@ -20,6 +20,9 @@ env:
 
 image:
 	docker build -t gcr.io/$(PROJECT)/$(APPNAME) .
+
+imagear:
+	docker build -t us-docker.pkg.dev/$(PROJECT)/$(APPNAME)/latest .	
 
 serve: 
 	docker run --name=$(APPNAME) -d -P $(APPNAME)	
@@ -31,5 +34,8 @@ clean:
 
 push:
 	docker push gcr.io/$(PROJECT)/$(APPNAME)	
+
+pushar: 
+	docker push us-docker.pkg.dev/$(PROJECT)/$(APPNAME)/latest
 
 publish: clean image push 	

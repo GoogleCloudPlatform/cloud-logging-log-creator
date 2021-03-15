@@ -15,7 +15,8 @@ The goal is to get the image hosted on Google Cloud Repositories. To do that:
 
 * Set the default project  
 `gcloud config set project [PROJECT_ID]`
-* Make the image and push to GCR
+* Make the image and push to GCR  
+`make publish`
 
 
 
